@@ -28,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tahomarobotics.robot.state.Pose2D;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /**
  * Adaptive Pure Pursuit Controller is proportional controller which follows a path or sequence of points.  The
@@ -108,6 +110,8 @@ public class AdaptivePurePursuitController implements PathController {
 			curvature, pose.x, pose.y, pose.heading, 
 			closest.x, closest.y, remainingDistance,
 			lookAheadPoint.x, lookAheadPoint.y));
+		
+		SmartDashboard.putNumberArray("LookAhead", new double[] {pose.x, pose.y, pose.heading, curvature, lookAheadPoint.x, lookAheadPoint.y});
 		
 		return curvature;
 	}
