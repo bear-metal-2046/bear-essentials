@@ -50,21 +50,17 @@ public abstract class PathCommand extends Command {
 		None, X, Y, Both
 	}
 	
-	private static final double CURVE_SEG_SIZE = 5.0;
-	
 	private final List<Waypoint> waypoints = new ArrayList<>();
 	protected final PathDirection direction;
-	private final Mirror mirror;
 	private final List<MotionProfile> motionProfiles;
 	private final PathController pathController;
 	private final MotionController motionController;
+	private final PathBuilder pathBuilder;
 	
 	private final Pose2D pose = new Pose2D();
 	private final MotionState setpoint = new MotionState();
 	private final MotionState current = new MotionState();
 	
-	private double pathDirection;
-	private Waypoint lastPoint = null;
 	private double pathStart;
 	private int profileIndex;
 	private boolean motionComplete;
@@ -75,17 +71,11 @@ public abstract class PathCommand extends Command {
 	
 	public PathCommand(final PathDirection direction, final Mirror mirror, final Pose2D initialPose) {
 		this.direction = direction;
-		this.mirror = mirror;
 		
-		// setup initial position and direction
-		addWaypoint(new Waypoint(initialPose.x, initialPose.y, 0.0));
-		pathDirection = initialPose.heading;
-		if (direction == PathDirection.Reversed) {
-			pathDirection += 180;
-		}
+		pathBuilder = new PathBuilder(direction, mirror, initialPose, waypoints);
 		
 		// create the path
-		createPath();
+		createPath(pathBuilder);
 		
 		// create the path direction controller
 		pathController = createPathController(waypoints, direction);
@@ -119,7 +109,7 @@ public abstract class PathCommand extends Command {
 
 		pose.heading = Math.toRadians(pose.heading);
 		if (direction == PathDirection.Reversed) {
-			pose.heading = PathCommand.normalizeAngle(pose.heading + Math.PI);
+			pose.heading = PathBuilder.normalizeAngle(pose.heading + Math.PI);
 		}
 
 		// steering command is the required curvature (1/radius of a circle)
@@ -153,103 +143,17 @@ public abstract class PathCommand extends Command {
 		return motionComplete && (motionController.onTarget() || isTimedOut());
 	}
 
-	protected abstract void createPath();
+	protected abstract void createPath(PathBuilder pathBuilder);
 	
-	protected void addWaypoint(Waypoint waypoint) {
-		lastPoint = waypoint;
-		waypoints.add(mirrorPoint(waypoint, mirror));
-	}
-	
-	public static Waypoint mirrorPoint(Waypoint waypoint, Mirror mirror) {
-		Waypoint pt = new Waypoint(waypoint);
-		switch(mirror) {
-		
-		case None:
-			break;
-			
-		case X:
-			pt.x = PathConstants.FIELD_LENGTH - pt.x;
-			break;
-			
-		case Y:
-			pt.y = PathConstants.FIELD_WIDTH  - pt.y;
-			break;
-			
-		case Both:
-			pt.x = PathConstants.FIELD_LENGTH - pt.x;
-			pt.y = PathConstants.FIELD_WIDTH  - pt.y;
-			break;
-		}
-		
-		return pt;
-	}
-	
-	public static Pose2D mirrorPose2D(Pose2D pose, Mirror mirror) {
-		Waypoint pt = PathCommand.mirrorPoint(new Waypoint(pose.x, pose.y, 0), mirror);
-		double heading = normalizeAngle(pose.heading + (mirror == Mirror.Y ? 180 : 0));
-		return new Pose2D(pt.x, pt.y, heading);
-	}
-
-
-	protected void addLine(double length, double maxSpeed) {
-
-		Waypoint waypoint = new Waypoint(lastPoint);
-		double pathDirRadians = Math.toRadians(pathDirection);
-		waypoint.x += length * Math.cos(pathDirRadians);
-		waypoint.y += length * Math.sin(pathDirRadians);
-		waypoint.speed = maxSpeed;
-		addWaypoint(waypoint);
-	}
-	
-	protected void addArc(double angle, double radius, double maxSpeed) {
-				
-		// convert arc to line segments
-		int numSegments = (int)(Math.abs(angle)/CURVE_SEG_SIZE) + 1;
-		double deltaAngle = angle / numSegments;
-		double endPointLen = Math.abs(Math.toRadians(deltaAngle)) * radius;
-		
-		for (int i = 0; i < numSegments; i++) {
-			
-			double endPointAngle = Math.toRadians(pathDirection + deltaAngle/2);
-
-			addWaypoint(new Waypoint(
-					lastPoint.x + endPointLen * Math.cos(endPointAngle), 
-					lastPoint.y + endPointLen * Math.sin(endPointAngle),
-					maxSpeed));
-			
-			pathDirection += deltaAngle;
-		}
-	}
-
-	protected void addArcToPoint(double x, double y, double maxSpeed) {
-		// reflect point and angle
-		Waypoint point = new Waypoint(x, y, maxSpeed);
-		
-		// calculate radius
-		double dist = point.distance(lastPoint);
-		double angle = normalizeAngle(point.angle(lastPoint) - normalizeAngle(Math.toRadians(pathDirection)));
-		double radius = Math.abs((dist / 2) / Math.sin(angle));
-		
-		// create arc
-		addArc(2 * Math.toDegrees(angle), radius, maxSpeed);
-	}
-	
-	private static double normalizeAngle(double angle) {
-		double newAngle = angle;
-	    while (newAngle <= -Math.PI) newAngle += Math.PI * 2;
-	    while (newAngle > Math.PI) newAngle -= Math.PI * 2;
-	    return newAngle;
-	}
-	
-	public Pose2D getFinalPose() {
-		Pose2D pose2D = new Pose2D(lastPoint.x, lastPoint.y, pathDirection);
-		if (direction == PathDirection.Reversed) {
-			pose2D.reverse();
-		}
-		return pose2D;
-	}
 
 	public List<Waypoint> getWaypoints() {
 		return waypoints;
 	}
+
+	private Pose2D getFinalPose() {
+		return pathBuilder.getFinalPose();
+	}
+
+
+
 }
