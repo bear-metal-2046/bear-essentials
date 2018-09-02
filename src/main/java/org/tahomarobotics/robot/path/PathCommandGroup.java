@@ -29,12 +29,13 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
 public abstract class PathCommandGroup extends CommandGroup {
 
 	private final List<Waypoint> waypoints = new ArrayList<>();
-	
+	public final List<Waypoint> segmentPts = new ArrayList<>();
 	public abstract Pose2D getStartingPose(); 
 	
 	protected void addPath(PathCommand path) {
 		addSequential(path);
 		waypoints.addAll(path.getWaypoints());
+		segmentPts.addAll(path.pathBuilder.createWaypoints());
 	}
 	
 	public double[] getPath() {
@@ -46,6 +47,10 @@ public abstract class PathCommandGroup extends CommandGroup {
 			path[i++] = pt.y;
 		}
 		return path;
+	}
+
+	protected List<Waypoint> getWaypoints() {
+		return waypoints;
 	}
 
 

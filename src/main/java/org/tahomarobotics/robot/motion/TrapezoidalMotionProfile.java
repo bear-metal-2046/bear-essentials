@@ -39,7 +39,7 @@ public class TrapezoidalMotionProfile extends MotionProfile {
 		
 		final double ta = (max_velocity - direction * startVelocity) / maxAcceleration;
 		final double td = (max_velocity - direction * endVelocity) / maxAcceleration;
-		double tv = (abs_distance - 0.5*ta*(max_velocity + direction * startVelocity) - 0.5*td*(max_velocity + direction * endVelocity)) / max_velocity;
+		double tv = abs_distance > 0 ? ((abs_distance - 0.5*ta*(max_velocity + direction * startVelocity) - 0.5*td*(max_velocity + direction * endVelocity)) / max_velocity) : 0;
 		if (tv < 0 && tv > -0.0001) {
 			tv = 0;
 		}

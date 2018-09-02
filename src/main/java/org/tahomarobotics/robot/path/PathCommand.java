@@ -19,7 +19,6 @@
  */
 package org.tahomarobotics.robot.path;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -28,6 +27,7 @@ import org.tahomarobotics.robot.motion.MotionController;
 import org.tahomarobotics.robot.motion.MotionProfile;
 import org.tahomarobotics.robot.motion.MotionState;
 import org.tahomarobotics.robot.state.Pose2D;
+import org.tahomarobotics.robot.util.MathUtil;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
@@ -50,12 +50,12 @@ public abstract class PathCommand extends Command {
 		None, X, Y, Both
 	}
 	
-	private final List<Waypoint> waypoints = new ArrayList<>();
+	private final List<Waypoint> waypoints;
 	protected final PathDirection direction;
 	private final List<MotionProfile> motionProfiles;
 	private final PathController pathController;
 	private final MotionController motionController;
-	private final PathBuilder pathBuilder;
+	public final PathBuilder pathBuilder;
 	
 	private final Pose2D pose = new Pose2D();
 	private final MotionState setpoint = new MotionState();
@@ -69,13 +69,22 @@ public abstract class PathCommand extends Command {
 		this(direction, mirror, priorPath.getFinalPose());
 	}
 	
+	/**
+	 *   1) First create the path via pathBuilder which returns a set of waypoints
+	 *   2) Create forward motion profile based on waypoints
+	 *   3) Create rotation motion profile base on waypoints
+	 *      a) limit rotational acceleration
+	 *   4) Combine forward and rotational motion into left and right motion profiles
+	 *   5) 
+	 */
 	public PathCommand(final PathDirection direction, final Mirror mirror, final Pose2D initialPose) {
 		this.direction = direction;
 		
-		pathBuilder = new PathBuilder(direction, mirror, initialPose, waypoints);
+		pathBuilder = new PathBuilder(direction, mirror, initialPose);
 		
 		// create the path
 		createPath(pathBuilder);
+		waypoints = pathBuilder.createWaypoints();
 		
 		// create the path direction controller
 		pathController = createPathController(waypoints, direction);
@@ -109,7 +118,7 @@ public abstract class PathCommand extends Command {
 
 		pose.heading = Math.toRadians(pose.heading);
 		if (direction == PathDirection.Reversed) {
-			pose.heading = PathBuilder.normalizeAngle(pose.heading + Math.PI);
+			pose.heading = MathUtil.normalizeAngle(pose.heading + Math.PI);
 		}
 
 		// steering command is the required curvature (1/radius of a circle)
@@ -150,7 +159,7 @@ public abstract class PathCommand extends Command {
 		return waypoints;
 	}
 
-	private Pose2D getFinalPose() {
+	public Pose2D getFinalPose() {
 		return pathBuilder.getFinalPose();
 	}
 

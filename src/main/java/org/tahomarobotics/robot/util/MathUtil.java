@@ -17,42 +17,26 @@
  * DEALINGS IN THE SOFTWARE.
  * 
  */
-package org.tahomarobotics.robot.state;
+package org.tahomarobotics.robot.util;
 
-public class Pose2D {
+public class MathUtil {
 	
-	public double x, y, heading;
-
-	public Pose2D() {
-	}
+	public static double TWO_PI = Math.PI * 2;
 	
-	public Pose2D(double x, double y, double heading) {
-		this.x = x;
-		this.y = y;
-		this.heading = heading;
-	}
-	
-	public Pose2D(Pose2D pose){
-		this(pose.x, pose.y, pose.heading);
-	}
-	
-	public Pose2D reverse() {
-		heading += 180;
-		heading = normalize(heading);
-		return this;
+	public static double normalizeAngleDegrees(double a) {
+		 return normalizeAngleDegrees(a, 0.0);
 	}
 
-	private double normalize(double angle) {
-		double newAngle = angle;
-	    while (newAngle <= -180) newAngle += 360;
-	    while (newAngle > 180) newAngle -= 360;
-	    return newAngle;
+	public static double normalizeAngleDegrees(double a, double center) {
+        return a - 360d * Math.floor((a + 180d - center) / 360d);
 	}
 
-	@Override
-	public String toString() {
-		return String.format("Pose: %6.2f %6.2f %6.2f", x, y, heading);
+	public static double normalizeAngle(double a) {
+        return normalizeAngle(a, 0.0);
 	}
 	
-	
+	public static double normalizeAngle(double a, double center) {
+        return a - TWO_PI * Math.floor((a + Math.PI - center) / TWO_PI);
+	}
+
 }
