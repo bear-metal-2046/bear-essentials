@@ -40,7 +40,9 @@ public class MotionController {
 	private double totalError;
 	private double prevTime;
 	private volatile boolean onTarget = true;
-	
+	private double positionError;
+	private double velocityError;
+
 	public void reset() {
 		prevTime = Double.NaN;
 		totalError = 0;
@@ -51,8 +53,8 @@ public class MotionController {
 	public double update(final double t, final MotionState currentState, final MotionState setpoint) {
 		 		
 		// Update error.
-        double positionError = setpoint.position - currentState.position;
-        double velocityError = setpoint.velocity - currentState.velocity;
+        positionError = setpoint.position - currentState.position;
+        velocityError = setpoint.velocity - currentState.velocity;
     	totalError = Double.isNaN(prevTime) ? 0.0 : (totalError + positionError * (t - prevTime));        	
     	prevTime = t;
         // Calculate the feed forward and proportional terms.
@@ -63,6 +65,8 @@ public class MotionController {
         		kV * velocityError + 
         		kI * totalError;
         
+        
+        
         onTarget = Math.abs(positionError) <= positionTolerance;
 
         return output;
@@ -71,4 +75,12 @@ public class MotionController {
 	public boolean onTarget() {
 		return onTarget;
 	}
+
+
+	@Override
+	public String toString() {
+		return String.format("%7.2f,%7.2f,%7.2f", positionError, velocityError, totalError);
+	}
+	
+	
 }
