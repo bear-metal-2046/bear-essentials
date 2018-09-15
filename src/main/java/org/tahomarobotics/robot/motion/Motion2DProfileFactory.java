@@ -75,7 +75,7 @@ public class Motion2DProfileFactory {
 		
 		startTime = 0;
 		double startRotationalVelocity = 0;
-		double startRotationalPosition = 0;
+		double startRotationalPosition = sections.get(0).startPose.heading;
 
 		for(int i = 0; i < sections.size(); i++) {
 			

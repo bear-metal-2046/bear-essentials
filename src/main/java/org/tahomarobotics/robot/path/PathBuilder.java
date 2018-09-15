@@ -62,7 +62,7 @@ public class PathBuilder {
 		}
 		
 		public Section(double angle, double radius, double maxVelocity, Pose2D startPose) {
-			double angleRadians = Math.toRadians(angle);
+			double angleRadians = MathUtil.normalizeAngle(Math.toRadians(angle));
 			this.length = Math.abs(angleRadians) * radius;
 			this.angle = angle;
 			this.radius = radius;
@@ -93,7 +93,8 @@ public class PathBuilder {
 	
 		startPose = mirrorPose2D(initialPose, mirror);
 		if (direction == PathDirection.Reversed) {
-			startPose.heading -= 180;
+			startPose.heading += 180;
+			startPose.heading = MathUtil.normalizeAngleDegrees(startPose.heading);
 		}
 		pathDirection = direction == PathDirection.Reversed ? initialPose.heading + 180 : initialPose.heading;
 

@@ -72,6 +72,10 @@ public class MotionController {
         return output;
 	}
 	
+	public double getPositionError() {
+		return positionError;
+	}
+	
 	public boolean onTarget() {
 		return onTarget;
 	}
