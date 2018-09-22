@@ -22,8 +22,7 @@ package org.tahomarobotics.robot.motion;
 import java.util.List;
 
 import org.tahomarobotics.robot.motion.MotionProfile.MotionProfileException;
-import org.tahomarobotics.robot.path.PathBuilder;
-import org.tahomarobotics.robot.path.PathBuilder.Section;
+import org.tahomarobotics.robot.path.PathSection;
 
 public class Motion2DProfileFactory {
 	
@@ -31,7 +30,7 @@ public class Motion2DProfileFactory {
 		Trapezoid, SCurve;
 	}
 	
-	public static void createMotionProfiles(List<PathBuilder.Section> sections, Profile profile, 
+	public static void createMotionProfiles(List<PathSection> sections, Profile profile, 
 			double maxAccel,    double maxJerk,    List<MotionProfile> fwdProfiles,
 			double maxRotAccel, double maxRotJerk, List<MotionProfile> rotProfiles) {
 		
@@ -41,7 +40,7 @@ public class Motion2DProfileFactory {
 
 		for(int i = 0; i < sections.size(); i++) {
 			
-			Section section = sections.get(i);	
+			PathSection section = sections.get(i);	
 			
 			double endPosition = startPosition + section.length;
 			double maxVelocity = section.maxVelocity;
@@ -79,7 +78,7 @@ public class Motion2DProfileFactory {
 
 		for(int i = 0; i < sections.size(); i++) {
 			
-			Section section = sections.get(i);	
+			PathSection section = sections.get(i);	
 			
 			double maxRotationalVelocity = section.maxRotationalVelocity;
 			double direction = Math.signum(section.angle);

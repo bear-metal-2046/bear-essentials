@@ -83,14 +83,22 @@ public class Waypoint {
 	}
 	
 	public double distance(Waypoint pt) {
-		double dx = pt.x - x;
-		double dy = pt.y - y;
+		return distance(pt.x, pt.y);
+	}
+	
+	public double distance(double x, double y) {
+		double dx = x - this.x;
+		double dy = y - this.y;
 		return Math.sqrt(dx*dx+dy*dy);
 	}
 	
 	public double angle(Waypoint pt) {
-		double dx = x - pt.x;
-		double dy = y - pt.y;
+		return angle(pt.x, pt.y);
+	}
+	
+	public double angle(double x, double y) {
+		double dx = this.x - x;
+		double dy = this.y - y;
 		return Math.atan2(dy, dx);
 	}
 
@@ -98,6 +106,4 @@ public class Waypoint {
 	public String toString() {
 		return String.format("%6.3f %6.3f %6.3f", x, y, speed);
 	}
-	
-
 }

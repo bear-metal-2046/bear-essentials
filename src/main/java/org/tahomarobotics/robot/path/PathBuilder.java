@@ -22,8 +22,6 @@ package org.tahomarobotics.robot.path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.tahomarobotics.robot.path.PathCommand.Mirror;
-import org.tahomarobotics.robot.path.PathCommand.PathDirection;
 import org.tahomarobotics.robot.state.Pose2D;
 import org.tahomarobotics.robot.util.MathUtil;
 
@@ -31,13 +29,26 @@ import edu.wpi.first.wpilibj.command.Command;
 
 public class PathBuilder {
 
+	public enum PathDirection {
+		Forward(1), Reversed(-1);
+		
+		public final double sign;
+		
+		private PathDirection(double sign) {
+			this.sign = sign;
+		}
+	}
+
+	public enum Mirror {
+		None, X, Y, Both
+	}
+	
 	private static final double CURVE_SEG_SIZE = 5.0;
 
-	private final List<Waypoint> waypoints = new ArrayList<>();
-	private double pathDirection;
-	private Waypoint lastPoint = null;
 	private final Mirror mirror;
-	protected final PathDirection direction;
+	private final PathDirection direction;
+	
+	// total length as path get built, used in creating path actions
 	private double totalLength;
 	
 	private final List<Command> waitForCommands = new ArrayList<>();
@@ -65,55 +76,8 @@ public class PathBuilder {
 			this.waitForCompletion = waitForCompletion;
 		}
 	}
-	
-	public class Section {
 		
-		public final double length;
-		public final double angle;
-		public final double radius;
-		public final double maxVelocity;
-		public double maxRotationalVelocity;
-		public final Pose2D startPose;
-		public final Pose2D endPose;
-		
-		
-		public Section(double length, double maxVelocity, Pose2D startPose) {
-			this.length = length;
-			this.angle = 0.0;
-			this.radius = 0.0;
-			this.maxVelocity = maxVelocity;
-			this.startPose = startPose;
-			this.endPose =  new Pose2D(startPose);		
-			
-			double angleRadians = Math.toRadians(startPose.heading);
-			endPose.x += length * Math.cos(angleRadians);
-			endPose.y += length * Math.sin(angleRadians);
-		}
-		
-		public Section(double angle, double radius, double maxVelocity, Pose2D startPose) {
-			double angleRadians = MathUtil.normalizeAngle(Math.toRadians(angle));
-			this.length = Math.abs(angleRadians) * radius;
-			this.angle = angle;
-			this.radius = radius;
-			this.maxVelocity = maxVelocity;
-			this.startPose = startPose;
-			this.endPose =  new Pose2D(startPose);		
-
-			double chord = 2.0 * radius * Math.sin(Math.abs(angleRadians)/2.0);
-			double halfAngle = Math.toRadians(startPose.heading) + angleRadians / 2.0;
-			
-			endPose.heading += angle;
-			endPose.x += chord * Math.cos(halfAngle);
-			endPose.y += chord * Math.sin(halfAngle);
-		}		
-		
-		@Override
-		public String toString() {
-			return String.format("Section: %6.1f %6.1f %6.1f - start%s - end%s", length, angle, maxVelocity, startPose, endPose);
-		}
-	}
-	
-	private final List<Section> sections = new ArrayList<>();
+	private final List<PathSection> sections = new ArrayList<>();
 	private Pose2D startPose;
 	
 	public PathBuilder(PathDirection direction, Mirror mirror, Pose2D initialPose) {
@@ -125,21 +89,12 @@ public class PathBuilder {
 			startPose.heading += 180;
 			startPose.heading = MathUtil.normalizeAngleDegrees(startPose.heading);
 		}
-		pathDirection = direction == PathDirection.Reversed ? initialPose.heading + 180 : initialPose.heading;
-
-		// setup initial position and direction
-		addWaypoint(new Waypoint(initialPose.x, initialPose.y, 0.0));
 	}
 	
-	public List<Section> getSections() {
+	public List<PathSection> getSections() {
 		return sections;
 	}
 
-
-	protected void addWaypoint(Waypoint waypoint) {
-		lastPoint = waypoint;
-		waypoints.add(mirrorPoint(waypoint, mirror));
-	}
 	
 	public static Waypoint mirrorPoint(Waypoint waypoint, Mirror mirror) {
 		Waypoint pt = new Waypoint(waypoint);
@@ -186,58 +141,32 @@ public class PathBuilder {
 		return new Pose2D(pt.x, pt.y, heading);
 	}
 
-
 	public void addLine(double length, double maxSpeed, PathAction... actions) {
 
-		Section section = new Section(length, maxSpeed, startPose);
+		PathSection section = new PathSection(length, maxSpeed, startPose);
 		startPose = section.endPose;
 		sections.add(section);
 
 		setupPathActions(totalLength, length, actions);
 		totalLength += length;
-		
-		Waypoint waypoint = new Waypoint(lastPoint);
-		double pathDirRadians = Math.toRadians(pathDirection);
-		waypoint.x += length * Math.cos(pathDirRadians);
-		waypoint.y += length * Math.sin(pathDirRadians);
-		waypoint.speed = maxSpeed;
-		addWaypoint(waypoint);
 	}
 	
 	public void addArc(double angle, double radius, double maxSpeed, PathAction... actions) {
 		
-		Section section = new Section(mirrorAngle(angle, mirror), radius, maxSpeed, startPose);
+		PathSection section = new PathSection(mirrorAngle(angle, mirror), radius, maxSpeed, startPose);
 		startPose = section.endPose;
 		sections.add(section);
 
 		setupPathActions(totalLength, section.length, actions);
-		totalLength += section.length;
-
-		// convert arc to line segments
-		int numSegments = (int)(Math.abs(angle)/CURVE_SEG_SIZE) + 1;
-		double deltaAngle = angle / numSegments;
-		double endPointLen = Math.abs(Math.toRadians(deltaAngle)) * radius;
-		
-		for (int i = 0; i < numSegments; i++) {
-			
-			double endPointAngle = Math.toRadians(pathDirection + deltaAngle/2);
-
-			addWaypoint(new Waypoint(
-					lastPoint.x + endPointLen * Math.cos(endPointAngle), 
-					lastPoint.y + endPointLen * Math.sin(endPointAngle),
-					maxSpeed));
-			
-			pathDirection += deltaAngle;
-		}
+		totalLength += section.length;	
 	}
 
 	public void addArcToPoint(double x, double y, double maxSpeed, PathAction... actions) {
-		// reflect point and angle
-		Waypoint point = new Waypoint(x, y, maxSpeed);
 		
 		// calculate radius
-		double dist = point.distance(lastPoint);
-		double angle = MathUtil.normalizeAngle(point.angle(lastPoint) - MathUtil.normalizeAngle(Math.toRadians(pathDirection)));
+		Waypoint point = new Waypoint(x, y, maxSpeed);
+		double dist = point.distance(startPose.x, startPose.y);
+		double angle = MathUtil.normalizeAngle(point.angle(startPose.x, startPose.y) - MathUtil.normalizeAngle(Math.toRadians(startPose.heading)));
 		double radius = Math.abs((dist / 2) / Math.sin(angle));
 		
 		// create arc
@@ -245,7 +174,7 @@ public class PathBuilder {
 	}
 	
 	public Pose2D getFinalPose() {
-		Pose2D pose2D = new Pose2D(lastPoint.x, lastPoint.y, pathDirection);
+		Pose2D pose2D = new Pose2D(startPose);
 		if (direction == PathDirection.Reversed) {
 			pose2D.reverse();
 		}
@@ -255,7 +184,7 @@ public class PathBuilder {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (Section section : sections) {
+		for (PathSection section : sections) {
 			
 			sb.append(section).append('\n');
 		}
@@ -266,7 +195,7 @@ public class PathBuilder {
 		List<Waypoint> waypoints = new ArrayList<>();
 		
 		Pose2D end = null;
-		for(Section section : sections) {
+		for(PathSection section : sections) {
 			
 			
 			if (section.angle == 0.0) {
