@@ -136,7 +136,10 @@ public class PathBuilder {
 	}
 	
 	public static Pose2D mirrorPose2D(Pose2D pose, Mirror mirror) {
-		double heading = MathUtil.normalizeAngleDegrees(pose.heading + (mirror == Mirror.X ? 180 : 0));
+		double heading = pose.heading;
+		if (mirror == Mirror.X || mirror == Mirror.Both) {
+			heading = MathUtil.normalizeAngleDegrees(heading + 180);
+		}
 		Waypoint pt = PathBuilder.mirrorPoint(new Waypoint(pose.x, pose.y, 0), mirror);
 		return new Pose2D(pt.x, pt.y, heading);
 	}
@@ -165,8 +168,10 @@ public class PathBuilder {
 		
 		// calculate radius
 		Waypoint point = new Waypoint(x, y, maxSpeed);
+		point = mirrorPoint(point, mirror);
 		double dist = point.distance(startPose.x, startPose.y);
 		double angle = MathUtil.normalizeAngle(point.angle(startPose.x, startPose.y) - MathUtil.normalizeAngle(Math.toRadians(startPose.heading)));
+		angle = mirrorAngle(angle, mirror);
 		double radius = Math.abs((dist / 2) / Math.sin(angle));
 		
 		// create arc
@@ -178,7 +183,7 @@ public class PathBuilder {
 		if (direction == PathDirection.Reversed) {
 			pose2D.reverse();
 		}
-		return pose2D;
+		return PathBuilder.mirrorPose2D(pose2D, mirror);
 	}
 
 	@Override
