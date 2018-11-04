@@ -24,7 +24,7 @@
 
 	<groupId>org.tahomarobotics</groupId>
 	<artifactId>bear-essentials</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>2018.1.0</version>
 
 	<repositories>
 		<repository>
