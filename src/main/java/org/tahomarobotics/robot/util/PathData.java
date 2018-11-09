@@ -65,7 +65,6 @@ public class PathData {
 		try {
 			mapper.writeValue(out, node);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -82,7 +81,6 @@ public class PathData {
 				return new PathData(reader.readValue(dataNode));
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

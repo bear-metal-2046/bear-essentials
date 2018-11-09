@@ -71,7 +71,6 @@ public class ChartData {
 		try {
 			mapper.writeValue(out, node);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -99,7 +98,6 @@ public class ChartData {
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
