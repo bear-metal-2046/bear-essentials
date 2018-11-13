@@ -50,13 +50,12 @@ public class PathBuilder {
 	
 	// total length as path get built, used in creating path actions
 	private double totalLength;
-	
-	private final List<Command> waitForCommands = new ArrayList<>();
-	
+		
 	public static class PathAction {
 		public final Command command;
 		public final double position;
 		public final boolean waitForCompletion;
+		private double pathPositionStart;
 		
 		public PathAction(Command action) {
 			this(action, 1.0, true);
@@ -75,8 +74,18 @@ public class PathBuilder {
 			this.position = Math.min(Math.max(position, 0.0), 1.0);
 			this.waitForCompletion = waitForCompletion;
 		}
+
+		public void setPathPositionStart(double pathPositionStart) {
+			this.pathPositionStart = pathPositionStart;
+		}
+		
+		public double getPathPositionStart() {
+			return pathPositionStart;
+		}
 	}
 		
+	private final List<PathAction> pathActions = new ArrayList<>();
+	
 	private final List<PathSection> sections = new ArrayList<>();
 	private Pose2D startPose;
 	
@@ -231,11 +240,12 @@ public class PathBuilder {
 	private void setupPathActions(double startLength, double length, PathAction... actions) {
 		
 		for(PathAction action : actions) {
-			if (action.waitForCompletion) {
-				waitForCommands.add(action.command);
-			}
-			
-			
+			action.setPathPositionStart(startLength + length * action.position);
+			pathActions.add(action);
 		}
+	}
+	
+	public List<PathAction> getPathActions() {
+		return pathActions;
 	}
 }
