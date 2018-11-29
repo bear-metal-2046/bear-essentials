@@ -22,10 +22,9 @@ package org.tahomarobotics.robot.path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.tahomarobotics.robot.path.PathActions.PathAction;
 import org.tahomarobotics.robot.state.Pose2D;
 import org.tahomarobotics.robot.util.MathUtil;
-
-import edu.wpi.first.wpilibj.command.Command;
 
 public class PathBuilder {
 
@@ -51,43 +50,10 @@ public class PathBuilder {
 	// total length as path get built, used in creating path actions
 	private double totalLength;
 		
-	public static class PathAction {
-		public final Command command;
-		public final double position;
-		public final boolean waitForCompletion;
-		private double pathPositionStart;
-		
-		public PathAction(Command action) {
-			this(action, 1.0, true);
-		}
-		
-		public PathAction(Command action, double position) {
-			this(action, position, true);
-		}
-
-		public PathAction(Command action, boolean waitForCompletion) {
-			this(action, 1.0, waitForCompletion);
-		}
-		
-		public PathAction(Command command, double position, boolean waitForCompletion) {
-			this.command = command;
-			this.position = Math.min(Math.max(position, 0.0), 1.0);
-			this.waitForCompletion = waitForCompletion;
-		}
-
-		public void setPathPositionStart(double pathPositionStart) {
-			this.pathPositionStart = pathPositionStart;
-		}
-		
-		public double getPathPositionStart() {
-			return pathPositionStart;
-		}
-	}
-		
-	private final List<PathAction> pathActions = new ArrayList<>();
-	
 	private final List<PathSection> sections = new ArrayList<>();
 	private Pose2D startPose;
+	
+	private final PathActions pathActions = new PathActions();
 	
 	public PathBuilder(PathDirection direction, Mirror mirror, Pose2D initialPose) {
 		this.direction = direction;
@@ -159,7 +125,7 @@ public class PathBuilder {
 		startPose = section.endPose;
 		sections.add(section);
 
-		setupPathActions(totalLength, length, actions);
+		pathActions.setupPathActions(totalLength, length, actions);
 		totalLength += length;
 	}
 	
@@ -169,7 +135,7 @@ public class PathBuilder {
 		startPose = section.endPose;
 		sections.add(section);
 
-		setupPathActions(totalLength, section.length, actions);
+		pathActions.setupPathActions(totalLength, section.length, actions);
 		totalLength += section.length;	
 	}
 
@@ -237,15 +203,8 @@ public class PathBuilder {
 		return waypoints;
 	}
 
-	private void setupPathActions(double startLength, double length, PathAction... actions) {
-		
-		for(PathAction action : actions) {
-			action.setPathPositionStart(startLength + length * action.position);
-			pathActions.add(action);
-		}
-	}
-	
-	public List<PathAction> getPathActions() {
+	public PathActions getPathActions() {
 		return pathActions;
 	}
+
 }
