@@ -28,6 +28,22 @@ public class MotionController {
 	public final double kffA;
 	public final double positionTolerance;
 
+	private double totalError;
+	private double prevTime;
+	private volatile boolean onTarget = true;
+	private double positionError;
+	private double velocityError;
+
+	/**
+	 * Motion Controller
+	 * 
+	 * @param kP - positional feed-back gain
+	 * @param kV - velocity feed-back gain
+	 * @param kI - integration feed-back gain
+	 * @param kffV - velocity feed=forward gain
+	 * @param kffA - acceleration feed-forward gain
+	 * @param positionTolerance - positional tolerance
+	 */
 	public MotionController(final double kP, final double kV, final double kI, final double kffV, final double kffA, final double positionTolerance) {
 			this.kP = kP;
 			this.kV = kV;
@@ -37,11 +53,6 @@ public class MotionController {
 			this.positionTolerance = positionTolerance;
 	}
 	
-	private double totalError;
-	private double prevTime;
-	private volatile boolean onTarget = true;
-	private double positionError;
-	private double velocityError;
 
 	/**
 	 * Clears out any previously held data
@@ -56,7 +67,7 @@ public class MotionController {
 	 * Controller update which calculates the controller output based on the current state and the provided set-point.
 	 * This calculates the output based on feed-forward and feed-back gains.
 	 * 
-	 * @param time
+	 * @param time - elapsed time
 	 * @param currentState - current motion state for position and velocity
 	 * @param setpoint - set-point for position, velocity and acceleration
 	 * @return calculated controller output

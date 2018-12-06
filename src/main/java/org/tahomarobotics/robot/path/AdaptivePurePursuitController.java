@@ -52,9 +52,8 @@ public class AdaptivePurePursuitController implements PathController {
 	/**
 	 * Constructs the path following controller.
 	 * 
-	 * @param path
+	 * @param waypoints - list of way-points that make up the path
 	 * @param lookAheadDistance - look ahead distance used to tune the gain of the controller
-	 * @param reversed - indicates if the robot needs to follow the path going in reverse, otherwise forward
 	 */
 	public AdaptivePurePursuitController(final List<Waypoint> waypoints, final double lookAheadDistance) {
 		this.path = new Path(waypoints);

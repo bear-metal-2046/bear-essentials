@@ -63,7 +63,7 @@ public class ChartData {
 	 * Adds a array of data for a new data point(s).  The first data point needs to be
 	 * the x-axis followed by the y-axis value for each series.
 	 * 
-	 * @param data - {<x-axis>, <y-axis[0]>, <y-axis[1]>, ..., <y-axis[n-l]>}
+	 * @param data - {x-axis, y-axis[0], y-axis[1], ..., y-axis[n-l]}
 	 */
 	public void addData(double[] data) {
 		assert(data != null && data.length == (names.size() - 2));
