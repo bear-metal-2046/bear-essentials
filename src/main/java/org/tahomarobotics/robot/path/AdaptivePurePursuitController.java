@@ -74,6 +74,9 @@ public class AdaptivePurePursuitController implements PathController {
 		
 	}
 	
+	/**
+	 * Resets the path controller to start from the beginning of the path.
+	 */
 	public void reset() {
 		complete = false;
 		path.start(new CompletionListener() {

@@ -53,10 +53,20 @@ public class MotionProfiles {
 		}
 	}
 	
+	/**
+	 * Resets the profile to start from the beginning.
+	 */
 	public void reset() {
 		index = 0;
 	}
 	
+	/**
+	 * Generate a new motion profile set-point at the given elapsed time.
+	 *  
+	 * @param elapsedTime - time (seconds) for the set-point
+	 * @param setpoint - set-point to be update from the profile
+	 * @return profile completion boolean 
+	 */
 	public boolean getSetpoint(final double elapsedTime, final MotionState setpoint) {
 		return getSetpoint(elapsedTime, setpoint, null);
 	}
@@ -86,6 +96,11 @@ public class MotionProfiles {
 		return true;
 	}
 	
+	/**
+	 * Returns the time duration of the motion profile in seconds.
+	 * 
+	 * @return total time duration (seconds)
+	 */
 	public double getTotalDuration() {
 		return totalDuration;
 	}

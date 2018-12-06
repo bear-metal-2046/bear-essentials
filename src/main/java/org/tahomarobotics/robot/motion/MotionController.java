@@ -43,20 +43,31 @@ public class MotionController {
 	private double positionError;
 	private double velocityError;
 
+	/**
+	 * Clears out any previously held data
+	 */
 	public void reset() {
 		prevTime = Double.NaN;
 		totalError = 0;
 		onTarget = false;
 	}
 	
-	
-	public double update(final double t, final MotionState currentState, final MotionState setpoint) {
+	/**
+	 * Controller update which calculates the controller output based on the current state and the provided set-point.
+	 * This calculates the output based on feed-forward and feed-back gains.
+	 * 
+	 * @param time
+	 * @param currentState - current motion state for position and velocity
+	 * @param setpoint - set-point for position, velocity and acceleration
+	 * @return calculated controller output
+	 */
+	public double update(final double time, final MotionState currentState, final MotionState setpoint) {
 		 		
 		// Update error.
         positionError = setpoint.position - currentState.position;
         velocityError = setpoint.velocity - currentState.velocity;
-    	totalError = Double.isNaN(prevTime) ? 0.0 : (totalError + positionError * (t - prevTime));        	
-    	prevTime = t;
+    	totalError = Double.isNaN(prevTime) ? 0.0 : (totalError + positionError * (time - prevTime));        	
+    	prevTime = time;
         // Calculate the feed forward and proportional terms.
         double output = 
         		kffV * setpoint.velocity + 
@@ -76,6 +87,10 @@ public class MotionController {
 		return positionError;
 	}
 	
+	/**
+	 * Indicates if the current state is within positional tolerance of the set-point
+	 * @return - true if within positional tolerance
+	 */
 	public boolean onTarget() {
 		return onTarget;
 	}

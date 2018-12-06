@@ -35,30 +35,61 @@ public class MotionState {
     	this.jerk = other.jerk;
     }
     
+    /**
+     * Sets the jerk to the specified value and returns the same object.
+     * 
+     * @param jerk - value to be set
+     * @return MotionState
+     */
     public MotionState setJerk(double jerk) {
     	this.jerk = jerk;
     	return this;
     }
     
+    /**
+     * Sets the acceleration to the specified value and returns the same object.
+     * 
+     * @param acceleration - value to be set
+     * @return MotionState
+     */
     public MotionState setAcceleration(double acceleration) {
     	this.acceleration = acceleration;
     	return this;
     }
     
+    /**
+     * Sets the velocity to the specified value and returns the same object.
+     * 
+     * @param velocity - value to be set
+     * @return MotionState
+     */
     public MotionState setVelocity(double velocity) {
     	this.velocity = velocity;
     	return this;
     }
     
+    /**
+     * Sets the position to the specified value and returns the same object.
+     * 
+     * @param position - value to be set
+     * @return MotionState
+     */
     public MotionState setPosition(double position) {
     	this.position = position;
     	return this;
     }
 
+    /**
+     * Sets the time to the specified value and returns the same object.
+     * 
+     * @param time - value to be set
+     * @return MotionState
+     */
     public MotionState setTime(double time) {
     	this.time = time;
     	return this;
     }
+
     @Override
 	public String toString() {
     	return String.format("%6.1f,%6.1f,%6.1f", acceleration, velocity, position);

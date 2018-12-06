@@ -26,6 +26,11 @@ import org.tahomarobotics.robot.path.PathActions.PathAction;
 import org.tahomarobotics.robot.state.Pose2D;
 import org.tahomarobotics.robot.util.MathUtil;
 
+/**
+ * Path Builder enables the creation of a segmented path with the addition of lines and curve segments from 
+ * a starting position and heading.
+ *
+ */
 public class PathBuilder {
 
 	public enum PathDirection {
@@ -55,6 +60,14 @@ public class PathBuilder {
 	
 	private final PathActions pathActions = new PathActions();
 	
+	/**
+	 * Creates a path builder for constructing a path with lines and arcs starting at the specified
+	 * starting location and automatically mirroring the path per the mirroring specification.
+	 * 
+	 * @param direction - forward or reversed
+	 * @param mirror - mirroring specification
+	 * @param initialPose - starting position
+	 */
 	public PathBuilder(PathDirection direction, Mirror mirror, Pose2D initialPose) {
 		this.direction = direction;
 		this.mirror = mirror;
@@ -66,11 +79,22 @@ public class PathBuilder {
 		}
 	}
 	
+	/**
+	 * Return the list of sections making up this path.
+	 * 
+	 * @return list of path sections
+	 */
 	public List<PathSection> getSections() {
 		return sections;
 	}
 
-	
+	/**
+	 * Takes a way-point and mirrors it about the specified axis.
+	 * 
+	 * @param waypoint - robot way-point
+	 * @param mirror - mirroring specification
+	 * @return mirrored robot way-point
+	 */
 	public static Waypoint mirrorPoint(Waypoint waypoint, Mirror mirror) {
 		Waypoint pt = new Waypoint(waypoint);
 		switch(mirror) {
@@ -95,6 +119,13 @@ public class PathBuilder {
 		return pt;
 	}
 	
+	/**
+	 * Takes a angle or heading and mirrors it about the specified axis.
+	 * 
+	 * @param angle - robot heading
+	 * @param mirror - mirroring specification
+	 * @return mirrored robot heading
+	 */
 	public static double mirrorAngle(double angle, Mirror mirror) {
 		
 		switch(mirror) {
@@ -110,6 +141,13 @@ public class PathBuilder {
 		return angle;
 	}
 	
+	/**
+	 * Takes a robot pose and mirrors it's location and heading about the specified axis.
+	 * 
+	 * @param pose - robot pose
+	 * @param mirror - mirroring specification
+	 * @return mirrored robot pose
+	 */
 	public static Pose2D mirrorPose2D(Pose2D pose, Mirror mirror) {
 		double heading = pose.heading;
 		if (mirror == Mirror.X || mirror == Mirror.Both) {
@@ -119,6 +157,14 @@ public class PathBuilder {
 		return new Pose2D(pt.x, pt.y, heading);
 	}
 
+	/**
+	 * Add a line path segment in the direction of the current heading for the specified length.
+	 * MaxSpeed constrains the speed for velocity profiling later.  Path actions can be optionally added.
+	 * 
+	 * @param length - length of the line path segment (inches)
+	 * @param maxSpeed - maximum speed constrain (inches/second)
+	 * @param actions - optional path action for path commanding
+	 */
 	public void addLine(double length, double maxSpeed, PathAction... actions) {
 
 		PathSection section = new PathSection(length, maxSpeed, startPose);
@@ -129,6 +175,15 @@ public class PathBuilder {
 		totalLength += length;
 	}
 	
+	/**
+	 * Add a curved path segment starting in the direction of the heading and curving for the specified angle and radius.
+	 * MaxSpeed constrains the speed for velocity profiling later.  Path actions can be optionally added.
+	 * 
+	 * @param angle - curve arc angle (degrees), positive is for counter-clockwise
+	 * @param radius - curve radius (inches), always positive
+	 * @param maxSpeed - maximum speed constrain (inches/second)
+	 * @param actions - optional path action for path commanding
+	 */
 	public void addArc(double angle, double radius, double maxSpeed, PathAction... actions) {
 		
 		PathSection section = new PathSection(mirrorAngle(angle, mirror), radius, maxSpeed, startPose);
@@ -139,6 +194,16 @@ public class PathBuilder {
 		totalLength += section.length;	
 	}
 
+	/**
+	 * Add a curved path segment starting in the direction of the path heading and curving to the specified end-point.  This 
+	 * automatically calculates the angle and radius to end at the specified point.  MaxSpeed constrains the speed for 
+	 * velocity profiling later.  Path actions can be optionally added.
+	 * 
+	 * @param x - x location on the field (inches from origin)
+	 * @param y - y location on the field (inches from origin)
+	 * @param maxSpeed - maximum speed constrain (inches/second)
+	 * @param actions - optional path action for path commanding
+	 */
 	public void addArcToPoint(double x, double y, double maxSpeed, PathAction... actions) {
 		
 		// calculate radius
@@ -153,6 +218,11 @@ public class PathBuilder {
 		addArc(2 * Math.toDegrees(angle), radius, maxSpeed, actions);
 	}
 	
+	/**
+	 * Return the final pose of this path.
+	 * 
+	 * @return pose of the path end-point
+	 */
 	public Pose2D getFinalPose() {
 		Pose2D pose2D = new Pose2D(startPose);
 		if (direction == PathDirection.Reversed) {
@@ -161,6 +231,9 @@ public class PathBuilder {
 		return PathBuilder.mirrorPose2D(pose2D, mirror);
 	}
 
+	/**
+	 * Return a description of the path segments.
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -171,6 +244,11 @@ public class PathBuilder {
 		return sb.toString();
 	}
 	
+	/**
+	 * Return a generated list of way-points representing the path.
+	 * 
+	 * @return list of path way-points
+	 */
 	public List<Waypoint> createWaypoints() {
 		List<Waypoint> waypoints = new ArrayList<>();
 		
@@ -203,6 +281,11 @@ public class PathBuilder {
 		return waypoints;
 	}
 
+	/**
+	 * Return the path actions which maintain each of the path added actions.
+	 * 
+	 * @return path actions
+	 */
 	public PathActions getPathActions() {
 		return pathActions;
 	}
