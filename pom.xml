@@ -24,7 +24,7 @@
 
 	<groupId>org.tahomarobotics</groupId>
 	<artifactId>bear-essentials</artifactId>
-	<version>2018.1.0</version>
+	<version>2018.1.0-SNAPSHOT</version>
 
 	<name>Bear-Essentials</name>
 	<description>base library for FRC robotics java development</description>
@@ -32,6 +32,8 @@
 	<url>https://gitlab.com/tahoma-robotics/bear-essentials</url>
 	
 	<scm>
+		<connection>scm:git:git@gitlab.com:tahoma-robotics/bear-essentials.git</connection>
+		<developerConnection>scm:git:git@gitlab.com:tahoma-robotics/bear-essentials.git</developerConnection>
 		<url>https://gitlab.com/tahoma-robotics/bear-essentials.git</url>
 	</scm>
 	
