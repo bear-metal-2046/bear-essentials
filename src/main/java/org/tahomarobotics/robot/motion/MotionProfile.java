@@ -96,6 +96,10 @@ public abstract class MotionProfile {
 	public double getEndPosition() {
 		return phases[phases.length - 1].position;
 	}
+	
+	public MotionState getLastMotionState() {
+		return phases[phases.length - 1];
+	}
 
 	@Override
 	public String toString() {

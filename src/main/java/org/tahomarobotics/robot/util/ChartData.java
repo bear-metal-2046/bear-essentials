@@ -42,6 +42,14 @@ public class ChartData {
 		}
 	}
 	
+	/**
+	 * Create a ChartData object with the specified title, axis and series names.
+	 * 
+	 * @param title - chart title
+	 * @param xaxis - x axis title
+	 * @param yaxis - y axis title
+	 * @param seriesNames - series name array (array length must match add data length)
+	 */
 	public ChartData(String title, String xaxis, String yaxis, String[] seriesNames) {
 		names.add(title);
 		names.add(xaxis);
@@ -51,15 +59,29 @@ public class ChartData {
 		}
 	}
 	
+	/**
+	 * Adds a array of data for a new data point(s).  The first data point needs to be
+	 * the x-axis followed by the y-axis value for each series.
+	 * 
+	 * @param data - {x-axis, y-axis[0], y-axis[1], ..., y-axis[n-l]}
+	 */
 	public void addData(double[] data) {
 		assert(data != null && data.length == (names.size() - 2));
 		this.data.add(data);
 	}
 	
+	/**
+	 * Removes all data point that have been added.
+	 */
 	public void clear() {
 		data.clear();
 	}
 	
+	/**
+	 * Serialize the titles and the data array into a byte array encoded as JSON
+	 * 
+	 * @return byte array of serialized chart data
+	 */
 	public byte[] serialize() {
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -71,13 +93,18 @@ public class ChartData {
 		try {
 			mapper.writeValue(out, node);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return out.toByteArray();
 	}
 	
+	/**
+	 * De-serialize the titles and data array into this class.
+	 * 
+	 * @param json - serialized byte array
+	 * @return de-serialized ChartData object
+	 */
 	public static ChartData deserialize(byte[] json) {
 		
 		try {
@@ -99,12 +126,12 @@ public class ChartData {
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return null;
 	}
+	
 	
 	public String getTitle() {
 		return names.get(0);

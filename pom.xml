@@ -24,7 +24,42 @@
 
 	<groupId>org.tahomarobotics</groupId>
 	<artifactId>bear-essentials</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>2018.1.0-SNAPSHOT</version>
+
+	<name>Bear-Essentials</name>
+	<description>base library for FRC robotics java development</description>
+
+	<url>https://gitlab.com/tahoma-robotics/bear-essentials</url>
+	
+	<scm>
+		<connection>scm:git:git@gitlab.com:tahoma-robotics/bear-essentials.git</connection>
+		<developerConnection>scm:git:git@gitlab.com:tahoma-robotics/bear-essentials.git</developerConnection>
+		<url>https://gitlab.com/tahoma-robotics/bear-essentials.git</url>
+	</scm>
+	
+	<organization>
+		<url>http://tahomarobotics.org/</url>
+		<name>Bear Metal Robotics - FRC 2046</name>
+	</organization>
+	
+	<inceptionYear>2018</inceptionYear>
+
+	<licenses>
+		<license>
+			<name>The MIT License (MIT)</name>
+			<url>https://opensource.org/licenses/MIT</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Bear Metal Programming Team</name>
+			<email>developers@tahomarobotics.org</email>
+			<organization>Bear Metal Programming Team</organization>
+			<organizationUrl>http://tahomarobotics.org/</organizationUrl>
+			<timezone>UTC+08:00</timezone>
+		</developer>
+	</developers>
 
 	<repositories>
 		<repository>
@@ -34,6 +69,11 @@
 		</repository>
 	</repositories>
 	
+	<properties>
+		<!-- remove warning about platform dependent -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>edu.wpi.first.wpilibj</groupId>
@@ -67,7 +107,6 @@
 					<source>1.8</source>
 					<target>1.8</target>
 					<fork>true</fork>
-					<executable>${JDK_HOME}\bin\javac</executable>
 				</configuration>
 			</plugin>
 
@@ -85,6 +124,111 @@
 				</executions>
 			</plugin>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.2</version>
+				<executions>
+					<execution>
+						<id>default-deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+					<localCheckout>true</localCheckout>
+					<pushChanges>false</pushChanges>
+					<mavenExecutorId>forked-path</mavenExecutorId>
+					<arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-provider-gitexe</artifactId>
+						<version>1.9.5</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
+	
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+	
+	<profiles>
+		<!-- GPG Signature on release -->
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

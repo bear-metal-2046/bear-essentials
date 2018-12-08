@@ -52,9 +52,8 @@ public class AdaptivePurePursuitController implements PathController {
 	/**
 	 * Constructs the path following controller.
 	 * 
-	 * @param path
+	 * @param waypoints - list of way-points that make up the path
 	 * @param lookAheadDistance - look ahead distance used to tune the gain of the controller
-	 * @param reversed - indicates if the robot needs to follow the path going in reverse, otherwise forward
 	 */
 	public AdaptivePurePursuitController(final List<Waypoint> waypoints, final double lookAheadDistance) {
 		this.path = new Path(waypoints);
@@ -68,10 +67,27 @@ public class AdaptivePurePursuitController implements PathController {
 				complete = true;
 			}
 		});
-		
+				
 		totalDistance = remainingDistance = path.getRemainingDistance();
 	
 		
+	}
+	
+	/**
+	 * Resets the path controller to start from the beginning of the path.
+	 */
+	public void reset() {
+		complete = false;
+		path.start(new CompletionListener() {
+
+			@Override
+			public void onCompletion() {
+				LOGGER.info("Finished path.");			
+				complete = true;
+			}
+		});
+		
+		remainingDistance = path.getRemainingDistance();
 	}
 	
 	public boolean isComplete() {
@@ -126,7 +142,8 @@ public class AdaptivePurePursuitController implements PathController {
 		
 		double dx = lookAheadPoint.x - pose.x;
 		double dy = lookAheadPoint.y - pose.y;
-		double x = dy * Math.cos(pose.heading) - dx * Math.sin(pose.heading);
+		double heading = Math.toRadians(pose.heading);
+		double x = dy * Math.cos(heading) - dx * Math.sin(heading);
 		double curvature = 2.0 * x / (dx*dx+dy*dy);
 		
 		return Double.isNaN(curvature) ? 0 : curvature;
@@ -152,6 +169,9 @@ public class AdaptivePurePursuitController implements PathController {
 		}
 
 		private void start(CompletionListener listener, List<Waypoint> waypoints) {
+			
+			segments.clear();
+			
 			// create the segments from the list of waypoints
 			Waypoint prev = null;
 			for (Waypoint next : waypoints) {

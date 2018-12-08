@@ -19,6 +19,7 @@
  */
 package org.tahomarobotics.robot.motion;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.tahomarobotics.robot.motion.MotionProfile.MotionProfileException;
@@ -26,13 +27,54 @@ import org.tahomarobotics.robot.path.PathSection;
 
 public class Motion2DProfileFactory {
 	
-	public enum Profile {
+	private enum Profile {
 		Trapezoid, SCurve;
 	}
 	
-	public static void createMotionProfiles(List<PathSection> sections, Profile profile, 
-			double maxAccel,    double maxJerk,    List<MotionProfile> fwdProfiles,
-			double maxRotAccel, double maxRotJerk, List<MotionProfile> rotProfiles) {
+	/**
+	 * Create a trapezoidal set of profiles for the provided Path constrained to the given acceleration.
+	 * 
+	 * @param sections - path sections with distances and max velocity constraints
+	 * @param maxAccel - max acceleration constraint
+	 * @return MotionProfiles for retrieving set-points
+	 */
+	public static MotionProfiles createTrapezoidMotionProfile(List<PathSection> sections, double maxAccel) {
+		List<MotionProfile> motionProfiles = new ArrayList<>();
+		createMotionProfiles(sections, Profile.Trapezoid, maxAccel, 0, motionProfiles);
+		return new MotionProfiles(motionProfiles);
+	}
+
+	/**
+	 * Create a trapezoidal set of profiles for the provided Path constrained to the given acceleration. This also
+	 * provides profiles for the rotation of the robot synchronized with the forward motion.
+	 * 
+	 * @param sections - path sections with distances and max velocity constraints
+	 * @param maxAccel - max acceleration constraint
+	 * @param maxRotationalAccel - max angular acceleration constraint
+	 * @return MotionProfiles for retrieving set-points
+	 */
+	public static MotionProfiles createTrapezoidMotionProfile(List<PathSection> sections, double maxAccel, double maxRotationalAccel) {
+		
+		List<MotionProfile> fwdMotionProfiles = new ArrayList<>();
+		createMotionProfiles(sections, Profile.Trapezoid, maxAccel, 0, fwdMotionProfiles);
+
+		List<MotionProfile> rotMotionProfiles = new ArrayList<>();
+		createRotationalMotionProfiles(sections, Profile.Trapezoid, fwdMotionProfiles, maxRotationalAccel, 0, rotMotionProfiles);
+				
+		return new MotionProfiles(fwdMotionProfiles, rotMotionProfiles);
+	}
+	
+	/**
+	 * Create a set of motion profiles from the provided path sections.  
+	 * 
+	 * @param sections - path sections used to create a motion profile
+	 * @param profile - Trapezoid and S-Curve
+	 * @param maxAccel - acceleration to be used to change velocity
+	 * @param maxJerk - jerk to be used to change acceleration (not used in Trapezoid)
+	 * @param motionProfiles - resultant profiles
+	 */
+	private static void createMotionProfiles(List<PathSection> sections, Profile profile, 
+			double maxAccel, double maxJerk, List<MotionProfile> motionProfiles) {
 		
 		double startTime = 0;
 		double startVelocity = 0;
@@ -52,54 +94,69 @@ public class Motion2DProfileFactory {
 					startVelocity, endVelocity,  
 					maxVelocity, maxAccel, maxJerk);
 			
-			fwdProfiles.add(motionProfile);
+			motionProfiles.add(motionProfile);
+					
+			startVelocity = endVelocity;
+			startPosition = endPosition;
+			startTime = motionProfile.getEndTime();
+		}		
+	}
+
+	
+	private static void createRotationalMotionProfiles(List<PathSection> sections, Profile profile, List<MotionProfile> fwdProfiles,
+			double maxRotAccel, double maxRotJerk, List<MotionProfile> rotProfiles) {
+		
+		double startTime = 0;
+
+		for(int i = 0; i < sections.size(); i++) {
+			PathSection section = sections.get(i);
+			MotionProfile fwdMotionProfile = fwdProfiles.get(i);
 			
 			// time to turn arc
-			double duration = motionProfile.getEndTime() - startTime;
-			
+			double duration = fwdMotionProfile.getEndTime() - startTime;
+		
 			// minimum acceleration is a triangular motion
 			double minAcceleration = 4*Math.abs(section.angle)/duration/duration;
 			if (maxRotAccel < minAcceleration) {
 				System.err.format("Rotational Acceleration too low %f < %f\n", maxRotAccel, minAcceleration);
 				maxRotAccel = minAcceleration;
 			}
-			
+		
 			// trapezoidal rotational velocity completing on time
 			section.maxRotationalVelocity = maxRotAccel/2*(duration-Math.sqrt(duration*duration-4*Math.abs(section.angle)/maxRotAccel));
-
-			startVelocity = endVelocity;
-			startPosition = endPosition;
-			startTime = motionProfile.getEndTime();
-		}		
+			
+			startTime = fwdMotionProfile.getEndTime();
+		}
 		
 		startTime = 0;
 		double startRotationalVelocity = 0;
 		double startRotationalPosition = sections.get(0).startPose.heading;
 
 		for(int i = 0; i < sections.size(); i++) {
-			
+		
 			PathSection section = sections.get(i);	
-			
+		
 			double maxRotationalVelocity = section.maxRotationalVelocity;
 			double direction = Math.signum(section.angle);
 			double endRotationalPosition = startRotationalPosition + section.angle;
 			double nextRotationalVelocity = (i+1) < sections.size() ? sections.get(i+1).maxRotationalVelocity : 0; 
 			double endRotationalVelocity = direction * Math.min(Math.abs(maxRotationalVelocity), Math.abs(nextRotationalVelocity));
 
-			MotionProfile motionProfile = createMotionProfile(profile, startTime, 
-				startRotationalPosition, endRotationalPosition, 
-				startRotationalVelocity, endRotationalVelocity,  
-				maxRotationalVelocity, maxRotAccel, maxRotJerk);
+			MotionProfile rotMotionProfile = createMotionProfile(profile, startTime, 
+					startRotationalPosition, endRotationalPosition, 
+					startRotationalVelocity, endRotationalVelocity,  
+					maxRotationalVelocity, maxRotAccel, maxRotJerk);
+		
+			rotProfiles.add(rotMotionProfile);
 			
-			rotProfiles.add(motionProfile);
-				
 			startRotationalVelocity = endRotationalVelocity;
 			startRotationalPosition = endRotationalPosition;
-			
+		
 			startTime = fwdProfiles.get(i).getEndTime();
 		}
+
 	}
-	
+		
 	private static MotionProfile createMotionProfile(Profile profile, 
 			double startTime, double startPosition, double endPosition, 
 			double startVelocity, double endVelocity, double maxVelocity, 
