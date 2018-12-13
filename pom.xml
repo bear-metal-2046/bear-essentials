@@ -24,7 +24,7 @@
 
 	<groupId>org.tahomarobotics</groupId>
 	<artifactId>bear-essentials</artifactId>
-	<version>2018.1.0</version>
+	<version>2018.1.1-SNAPSHOT</version>
 
 	<name>Bear-Essentials</name>
 	<description>base library for FRC robotics java development</description>
@@ -186,6 +186,26 @@
 				</configuration>
 			</plugin>
 
+		</plugins>
+		
+	</build>
+	
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
@@ -200,18 +220,8 @@
 							</execution>
 						</executions>
 					</plugin>
-		</plugins>
-	</build>
-	
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
-	
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
