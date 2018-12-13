@@ -86,7 +86,7 @@ public class PathActions {
 		 * Creates a path action for the given command to start at a mid-point through the associated 
 		 * path segment and wait for completion if desired
 		 *  
-		 * @param action - command to be executed
+		 * @param command - command to be executed
 		 * @param position - relative mid-point position (0.0 - 1.0) 
 		 * @param waitForCompletion - false indicated not to wait for the action to complete
 		 */
