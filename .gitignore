@@ -2,5 +2,6 @@
 /.classpath
 /.project
 /.settings/
+/.idea/
 /pom.xml.releaseBackup
 /release.properties
