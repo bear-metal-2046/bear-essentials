@@ -1,4 +1,4 @@
-package org.tahomarobotics.robot.path.Followers;
+package org.tahomarobotics.robot.path.follower;
 
 import org.tahomarobotics.robot.motion.MotionState;
 import org.tahomarobotics.robot.path.Path;

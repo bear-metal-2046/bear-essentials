@@ -17,7 +17,7 @@
  * DEALINGS IN THE SOFTWARE.
  * 
  */
-package org.tahomarobotics.robot.path.Followers;
+package org.tahomarobotics.robot.path.follower;
 
 import java.util.List;
 
