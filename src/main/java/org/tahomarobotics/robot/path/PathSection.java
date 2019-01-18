@@ -54,7 +54,7 @@ public class PathSection {
 		this.startPose = startPose;
 		this.endPose =  new Pose2D(startPose);		
 
-		double chord = 2.0 * radius * Math.sin(Math.abs(angleRadians)/2.0);
+		double chord = 2.0 * radius * Math.sin(Math.abs(angleRadians)/2.0) * (Math.abs(angle) > 180 ? -1 : 1);
 		double halfAngle = Math.toRadians(startPose.heading) + angleRadians / 2.0;
 		
 		endPose.heading += angle;
