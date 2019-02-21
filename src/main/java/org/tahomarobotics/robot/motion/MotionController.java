@@ -73,6 +73,9 @@ public class MotionController {
 	 * @return calculated controller output
 	 */
 	public double update(final double time, final MotionState currentState, final MotionState setpoint) {
+		if(Math.abs(time - Double.isNaN(prevTime) ? 0.0 : prevTime) > 0.001){
+			reset();
+		}
 		 		
 		// Update error.
         positionError = setpoint.position - currentState.position;
