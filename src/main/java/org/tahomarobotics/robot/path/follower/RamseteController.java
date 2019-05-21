@@ -34,7 +34,8 @@ public class RamseteController {
     }
 
     /**
-     * Fills the robot speed with the wanted velocities based off of Ramsete: http://www.diag.uniroma1.it/%7Elabrob/pub/papers/RAMSETE_Chap_LNCIS270.pdf
+     * Fills the robot speed with the wanted velocities based off of this paper:
+     * http://www.diag.uniroma1.it/%7Elabrob/pub/papers/RAMSETE_Chap_LNCIS270.pdf
      *
      * @param toFill         RobotSpeed
      * @param wantedForward  MotionState
@@ -68,6 +69,11 @@ public class RamseteController {
 
         //System.out.format("Wanted forward velocity: %6.3f Wanted Rotation: %6.3f k1: %6.3f errX: %6.3f errY: %6.3f errTheta: %6.3f Motion Forward: %6.3f Motion Rotation: %6.3f\n", toFill.forwardVelocity, toFill.rotationalVelocity, k1, errX, errY, errTheta, wantedForward.velocity, wantedRotation.velocity);
     }
+
+    public boolean isComplete() {
+        return complete;
+    }
+
 
     private double boundHeading(double heading) {
         while (heading > Math.PI) heading -= 2 * Math.PI;
