@@ -36,18 +36,12 @@ public class TrapezoidalMotionProfile extends MotionProfile {
 				maxVelocity,
 				Math.sqrt(abs_distance*maxAcceleration + startVelocity * startVelocity / 2 
 						+ endVelocity * endVelocity / 2));
-		
-		final double ta = (max_velocity - direction * startVelocity) / maxAcceleration;
-		final double td = (max_velocity - direction * endVelocity) / maxAcceleration;
-		double tv = abs_distance > 0 ? ((abs_distance - 0.5*ta*(max_velocity + direction * startVelocity) - 0.5*td*(max_velocity + direction * endVelocity)) / max_velocity) : 0;
-		if (tv < 0 && tv > -0.0001) {
-			tv = 0;
-		}
-	
-		if (ta < 0 || td < 0 || tv < 0) {
-			
-			throw new MotionProfileException(String.format("Failed to resolve constraint while creating Trapezoidal profile ta=%f td=%f tv=%f \n%s", ta, td, tv, this));
-		}
+
+
+		final double ta = Math.max(0, (max_velocity - direction * startVelocity) / maxAcceleration);
+		final double td = Math.max(0, (max_velocity - direction * endVelocity) / maxAcceleration);
+		final double tv = Math.max(0, abs_distance > 0 ? ((abs_distance - 0.5*ta*(max_velocity + direction * startVelocity) - 0.5*td*(max_velocity + direction * endVelocity)) / max_velocity) : 0);
+
 		
 		double max_acceleration = direction * maxAcceleration;
 		max_velocity *= direction;
