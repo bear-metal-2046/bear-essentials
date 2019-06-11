@@ -37,10 +37,10 @@ public class RamseteController {
      * Fills the robot speed with the wanted velocities based off of this paper:
      * http://www.diag.uniroma1.it/%7Elabrob/pub/papers/RAMSETE_Chap_LNCIS270.pdf
      *
-     * @param toFill         RobotSpeed
-     * @param wantedForward  MotionState
-     * @param wantedRotation MotionState
-     * @param pose           Pose2D
+     * @param toFill         RobotSpeed  Robot Speed output
+     * @param wantedForward  MotionState State from Motion Profile
+     * @param wantedRotation MotionState Rotational state from Motion Profile
+     * @param pose           Pose2D      Current Pose
      */
     public void update(RobotSpeed toFill, MotionState wantedForward, MotionState wantedRotation, Pose2D pose) {
         //Get point we should be at
