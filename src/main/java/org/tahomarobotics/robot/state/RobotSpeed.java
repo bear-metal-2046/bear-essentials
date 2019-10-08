@@ -22,17 +22,19 @@ package org.tahomarobotics.robot.state;
 public class RobotSpeed {
 	public double forward;
 	public double rotational;
+	public double strafe;
+
 
 	public RobotSpeed() {
-		this(0, 0);
+		this(0, 0, 0);
 	}
 
 	public RobotSpeed(RobotSpeed other) {
-		update(other.forward, other.rotational);
+		update(other.forward, other.rotational, other.strafe);
 	}
 
-	public RobotSpeed(double forward, double rotational) {
-		update(forward, rotational);
+	public RobotSpeed(double forward, double rotational, double strafe) {
+		update(forward, rotational, strafe);
 	}
 
 	public void reduce(double scale) {
@@ -40,20 +42,22 @@ public class RobotSpeed {
 		if (scale < 1.0) {
 			forward *= scale;
 			rotational *= scale;
+			strafe *= scale;
 		}
 	}
 
-	public void update(double forward, double rotational) {
+	public void update(double forward, double rotational, double strafe) {
 		this.forward = forward;
 		this.rotational = rotational;
+		this.strafe = strafe;
 	}
 	
 	public void copyFrom(RobotSpeed other) {
-		update(other.forward, other.rotational);
+		update(other.forward, other.rotational, other.strafe);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("Speed: %6.3f %6.3f", forward, rotational);
+		return String.format("Speed: %6.3f %6.3f %6.3f", forward, rotational, strafe);
 	}
 }
