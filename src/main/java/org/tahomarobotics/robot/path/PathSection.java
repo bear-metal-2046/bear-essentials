@@ -22,6 +22,8 @@ package org.tahomarobotics.robot.path;
 import org.tahomarobotics.robot.state.Pose2D;
 import org.tahomarobotics.robot.util.MathUtil;
 
+import java.nio.file.Path;
+
 public class PathSection {
 	public final double length;
 	public final double angle;
@@ -60,8 +62,16 @@ public class PathSection {
 		endPose.heading += angle;
 		endPose.x += chord * Math.cos(halfAngle);
 		endPose.y += chord * Math.sin(halfAngle);
-	}		
-	
+	}
+
+	public PathSection mult(double mult){
+		startPose.x *= mult;
+		startPose.y *= mult;
+		startPose.heading *= mult;
+
+		return new PathSection(angle * mult, radius * mult, maxVelocity * mult, startPose);
+	}
+
 	@Override
 	public String toString() {
 		return String.format("Section: %6.1f %6.1f %6.1f - start%s - end%s", length, angle, maxVelocity, startPose, endPose);
