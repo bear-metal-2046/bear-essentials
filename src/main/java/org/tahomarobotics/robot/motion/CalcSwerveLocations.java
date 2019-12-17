@@ -2,30 +2,36 @@ package org.tahomarobotics.robot.motion;
 
 public class CalcSwerveLocations {
 
-	private final double WHEELBASE = 20;
-	private final double TRACKWIDTH = 20;
+	private final double WHEELBASE;
+	private final double TRACKWIDTH;
 
 	private double forward, strafe, rotation, heading;
 	private boolean fieldCentric;
 
 	public CalcSwerveLocations(){
-		this(0.0,0.0,0.0,false,0.0);
+		this(0.0,0.0,0.0,false,0.0, 20.0, 20.0);
+	}
+	public CalcSwerveLocations(double WHEELBASE, double TRACKWIDTH){
+		this(0.0,0.0,0.0,false,0.0, WHEELBASE, TRACKWIDTH);
+
 	}
 	public CalcSwerveLocations(double forward, double strafe, double rotation){
-		this(forward, strafe, rotation, false, 0.0);
+		this(forward, strafe, rotation, false, 0.0, 20.0, 20.0);
 	}
 	public CalcSwerveLocations(double forward, double strafe, boolean fieldCentric, double heading){
-		this(forward, strafe, 0.0, fieldCentric, heading);
+		this(forward, strafe, 0.0, fieldCentric, heading, 20.0, 20.0);
 	}
 	public CalcSwerveLocations(double forward, double strafe, double rotation, boolean fieldCentric){
-		this(forward, strafe, rotation, fieldCentric, 0.0);
+		this(forward, strafe, rotation, fieldCentric, 0.0, 20.0, 20.0);
 	}
-	public CalcSwerveLocations(double forward, double strafe, double rotation, boolean fieldCentric, double heading){
+	public CalcSwerveLocations(double forward, double strafe, double rotation, boolean fieldCentric, double heading, double WHEELBASE, double TRACKWIDTH){
 		this.forward = forward;
 		this.strafe = strafe;
 		this.rotation = rotation;
 		this.fieldCentric = fieldCentric;
 		this.heading = heading;
+		this.WHEELBASE = WHEELBASE;
+		this.TRACKWIDTH = TRACKWIDTH;
 	}
 
 	public void setR(double r){
