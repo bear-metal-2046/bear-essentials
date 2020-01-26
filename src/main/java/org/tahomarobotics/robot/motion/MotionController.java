@@ -62,7 +62,33 @@ public class MotionController {
 		totalError = 0;
 		onTarget = false;
 	}
-	
+
+	public double updateVel(final double time, final MotionState currentState, final MotionState setpoint){
+		if (!Double.isNaN(prevTime)) {
+			if ((time - prevTime) > 0.100) {
+				reset();
+			}
+		}
+
+		// Update error.
+		positionError = setpoint.velocity - currentState.velocity;
+		velocityError = setpoint.acceleration - currentState.acceleration;
+		totalError = Double.isNaN(prevTime) ? 0.0 : (totalError + positionError * (time - prevTime));
+		prevTime = time;
+		// Calculate the feed forward and proportional terms.
+		double output =
+				kffV * setpoint.velocity +
+						kffA * setpoint.acceleration +
+						kP * positionError +
+						kV * velocityError +
+						kI * totalError;
+
+		onTarget = Math.abs(positionError) <= positionTolerance;
+
+		return output;
+
+	}
+
 	/**
 	 * Controller update which calculates the controller output based on the current state and the provided set-point.
 	 * This calculates the output based on feed-forward and feed-back gains.
