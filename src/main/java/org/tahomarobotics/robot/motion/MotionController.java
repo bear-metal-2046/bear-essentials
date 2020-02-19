@@ -1,21 +1,21 @@
 /**
  * Copyright 2018 Tahoma Robotics - http://tahomarobotics.org - Bear Metal 2046 FRC Team
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
  * documentation files (the "Software"), to deal in the Software without restriction, including without 
  * limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the 
  * Software, and to permit persons to whom the Software is furnished to do so, subject to the following 
  * conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions 
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
  * TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
  * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
- * 
+ *
  */
 package org.tahomarobotics.robot.motion;
 
@@ -36,7 +36,7 @@ public class MotionController {
 
 	/**
 	 * Motion Controller
-	 * 
+	 *
 	 * @param kP - positional feed-back gain
 	 * @param kV - velocity feed-back gain
 	 * @param kI - integration feed-back gain
@@ -45,14 +45,14 @@ public class MotionController {
 	 * @param positionTolerance - positional tolerance
 	 */
 	public MotionController(final double kP, final double kV, final double kI, final double kffV, final double kffA, final double positionTolerance) {
-			this.kP = kP;
-			this.kV = kV;
-			this.kI = kI;
-			this.kffV = kffV;
-			this.kffA = kffA;
-			this.positionTolerance = positionTolerance;
+		this.kP = kP;
+		this.kV = kV;
+		this.kI = kI;
+		this.kffV = kffV;
+		this.kffA = kffA;
+		this.positionTolerance = positionTolerance;
 	}
-	
+
 
 	/**
 	 * Clears out any previously held data
@@ -63,6 +63,7 @@ public class MotionController {
 		onTarget = false;
 	}
 
+	private double prevSign = 1;
 	public double updateVel(final double time, final MotionState currentState, final MotionState setpoint){
 		if (!Double.isNaN(prevTime)) {
 			if ((time - prevTime) > 0.100) {
@@ -70,6 +71,11 @@ public class MotionController {
 			}
 		}
 
+		double sign = Math.signum(setpoint.velocity - currentState.velocity);
+		if(sign != prevSign){
+			totalError = 0.;
+		}
+		prevSign = sign;
 		// Update error.
 		positionError = setpoint.velocity - currentState.velocity;
 		velocityError = setpoint.acceleration - currentState.acceleration;
@@ -92,7 +98,7 @@ public class MotionController {
 	/**
 	 * Controller update which calculates the controller output based on the current state and the provided set-point.
 	 * This calculates the output based on feed-forward and feed-back gains.
-	 * 
+	 *
 	 * @param time - elapsed time
 	 * @param currentState - current motion state for position and velocity
 	 * @param setpoint - set-point for position, velocity and acceleration
@@ -104,31 +110,36 @@ public class MotionController {
 				reset();
 			}
 		}
-		 		
-		// Update error.
-        positionError = setpoint.position - currentState.position;
-        velocityError = setpoint.velocity - currentState.velocity;
-    	totalError = Double.isNaN(prevTime) ? 0.0 : (totalError + positionError * (time - prevTime));        	
-    	prevTime = time;
-        // Calculate the feed forward and proportional terms.
-        double output = 
-        		kffV * setpoint.velocity + 
-        		kffA * setpoint.acceleration + 
-        		kP * positionError + 
-        		kV * velocityError + 
-        		kI * totalError;
-        
-        
-        
-        onTarget = Math.abs(positionError) <= positionTolerance;
 
-        return output;
+		double sign = Math.signum(setpoint.position - currentState.position);
+		if(sign != prevSign){
+			totalError = 0.;
+		}
+		prevSign = sign;
+		// Update error.
+		positionError = setpoint.position - currentState.position;
+		velocityError = setpoint.velocity - currentState.velocity;
+		totalError = Double.isNaN(prevTime) ? 0.0 : (totalError + positionError * (time - prevTime));
+		prevTime = time;
+		// Calculate the feed forward and proportional terms.
+		double output =
+				kffV * setpoint.velocity +
+						kffA * setpoint.acceleration +
+						kP * positionError +
+						kV * velocityError +
+						kI * totalError;
+
+
+
+		onTarget = Math.abs(positionError) <= positionTolerance;
+
+		return output;
 	}
-	
+
 	public double getPositionError() {
 		return positionError;
 	}
-	
+
 	/**
 	 * Indicates if the current state is within positional tolerance of the set-point
 	 * @return - true if within positional tolerance
@@ -142,6 +153,6 @@ public class MotionController {
 	public String toString() {
 		return String.format("%7.2f,%7.2f,%7.2f", positionError, velocityError, totalError);
 	}
-	
-	
+
+
 }
