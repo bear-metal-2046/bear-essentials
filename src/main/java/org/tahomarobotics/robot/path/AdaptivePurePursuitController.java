@@ -118,22 +118,24 @@ public class AdaptivePurePursuitController implements PathController {
 		remainingDistance = path.getRemainingDistance();
 
 		// create curve to join path at the look ahead point
-		double curvature = getJoinCurvature(pose, lookAheadPoint);
+		double angle = getJoinAngle(pose, lookAheadPoint);
+
+
 
 		Waypoint closest = path.getClosestPoint();
 		LOGGER.debug(String.format("Cmd: %7.3f Robot: %7.3f %7.3f %7.3f Path: %7.3f %7.3f Remaining: %7.3f Lookahead Point %7.3f %7.3f",
-				curvature, pose.x, pose.y, pose.heading,
+				angle, pose.x, pose.y, pose.heading,
 				closest.x, closest.y, remainingDistance,
 				lookAheadPoint.x, lookAheadPoint.y));
 
 		lookaheadData[0] = pose.x;
 		lookaheadData[0] = pose.y;
 		lookaheadData[0] = pose.heading;
-		lookaheadData[0] = curvature;
+		lookaheadData[0] = angle;
 		lookaheadData[0] = lookAheadPoint.x;
 		lookaheadData[0] = lookAheadPoint.y;
 
-		return curvature;
+		return angle;
 	}
 
 
@@ -156,6 +158,13 @@ public class AdaptivePurePursuitController implements PathController {
 		double curvature = 2.0 * x / (dx*dx+dy*dy);
 
 		return Double.isNaN(curvature) ? 0 : curvature;
+	}
+
+	private double getJoinAngle(Pose2D pose, Waypoint lookAheadPoint){
+		double dx = lookAheadPoint.x - pose.x;
+		double dy = lookAheadPoint.y - pose.y;
+		double angle = Math.atan2(dy, dx);
+		return angle;
 	}
 
 
