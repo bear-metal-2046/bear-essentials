@@ -95,6 +95,17 @@ public class MotionController {
 
 	}
 
+	public double updateVelSimple(double time, double currentVelocity, double targetVelocity){
+		//update error
+		positionError = targetVelocity - currentVelocity;
+		totalError = Double.isNaN(prevTime) ? 0.0 : (totalError + positionError * (time - prevTime));
+		prevTime = time;
+
+		return kffV * targetVelocity +
+					kP * positionError +
+					kI * totalError;
+	}
+
 	/**
 	 * Controller update which calculates the controller output based on the current state and the provided set-point.
 	 * This calculates the output based on feed-forward and feed-back gains.
