@@ -22,7 +22,7 @@ package org.tahomarobotics.robot.motion;
 public class TrapezoidalMotionProfile extends MotionProfile {
 
 	public TrapezoidalMotionProfile(double startTime, double startPosition, double endPosition, double startVelocity, double endVelocity, double maxVelocity, double maxAcceleration) throws MotionProfileException {
-		super(startTime, startPosition, endPosition, startVelocity, endVelocity, maxVelocity, maxAcceleration);
+		super(startTime, startPosition, endPosition, startVelocity, endVelocity, maxVelocity, maxAcceleration, 0);
 	}
 
 	@Override

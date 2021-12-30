@@ -115,7 +115,8 @@ public class MotionProfileFactory {
 						startVelocity, endVelocity, maxVelocity, maxAccel);
 			
 			case SCurve:
-
+				return new SCurveMotionProfile(startTime, startPosition, endPosition,
+						startVelocity, endVelocity, maxVelocity, maxAccel, maxJerk);
 			}
 		} catch (MotionProfileException e) {
 			e.printStackTrace();
