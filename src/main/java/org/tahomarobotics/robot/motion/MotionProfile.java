@@ -39,8 +39,9 @@ public abstract class MotionProfile {
 	protected final double endVelocity;
 	protected final double maxVelocity;
 	protected final double maxAcceleration;
+	protected final double maxJerk;
 	
-	MotionProfile(double startTime, double startPosition, double endPosition, double startVelocity, double endVelocity, double maxVelocity, double maxAcceleration) throws MotionProfileException {
+	MotionProfile(double startTime, double startPosition, double endPosition, double startVelocity, double endVelocity, double maxVelocity, double maxAcceleration, double maxJerk) throws MotionProfileException {
 		this.startTime = startTime;
 		this.startPosition = startPosition;
 		this.endPosition = endPosition;
@@ -48,6 +49,7 @@ public abstract class MotionProfile {
 		this.endVelocity = endVelocity;
 		this.maxVelocity = maxVelocity;
 		this.maxAcceleration = maxAcceleration;
+		this.maxJerk = maxJerk;
 		
 		phases = generatePhases();
 	}

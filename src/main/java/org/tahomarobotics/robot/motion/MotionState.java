@@ -92,8 +92,8 @@ public class MotionState {
 
     @Override
 	public String toString() {
-    	return String.format("%6.1f,%6.1f,%6.1f", acceleration, velocity, position);
+    	return String.format("t=%6.2f, j=%6.1f, a=%6.3f, v=%6.3f, p=%6.3f", time, jerk, acceleration, velocity, position);
 	}
     
-    
+
 }
